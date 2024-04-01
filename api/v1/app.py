@@ -2,6 +2,7 @@
 """ Flask app """
 
 from flask import Flask
+from flask_cors import CORS
 from models import storage
 from api.v1.views import app_views
 from os import getenv
@@ -10,6 +11,9 @@ app = Flask(__name__)
 
 app.register_blueprint(app_views, url_prefix='/api/v1')
 
+app_host = getenv('HBNB_API_HOST', '0.0.0.0')
+app.url_map.strict_slashes = False
+CORS(app, resources={'/*': {'origins': app_host}})
 
 @app.teardown_appcontext
 def teardown(exception):
