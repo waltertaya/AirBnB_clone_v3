@@ -40,16 +40,6 @@ class FileStorage:
             key = obj.__class__.__name__ + "." + obj.id
             self.__objects[key] = obj
 
-    def get(self, cls, id):
-        """A method to retrieve one object:
-          Returns the object based on the class and its ID, or None if not found"""
-        key = cls.__name__ + '.' + id
-        return self.__objects.get(key, None)
-    
-    def count(self, cls=None):
-        """A method to count the number of objects in storage"""
-        return len(self.all(cls))
-
     def save(self):
         """serializes __objects to the JSON file (path: __file_path)"""
         json_objects = {}
@@ -64,8 +54,9 @@ class FileStorage:
             with open(self.__file_path, 'r') as f:
                 jo = json.load(f)
             for key in jo:
-                self.__objects[key] = classes[jo[key]["__class__"]](**jo[key])
-        except:
+                self.__objects[key] = classes[jo[key]
+                                              ["__class__"]](**jo[key])
+        except FileNotFoundError:
             pass
 
     def delete(self, obj=None):
@@ -78,3 +69,14 @@ class FileStorage:
     def close(self):
         """call reload() method for deserializing the JSON file to objects"""
         self.reload()
+
+    def get(self, cls, id):
+        """A method to retrieve one object:
+          Returns the object based on the class
+            and its ID, or None if not found"""
+        key = cls.__name__ + '.' + id
+        return self.__objects.get(key, None)
+
+    def count(self, cls=None):
+        """A method to count the number of objects in storage"""
+        return len(self.all(cls))
