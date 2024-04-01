@@ -15,6 +15,7 @@ app_host = getenv('HBNB_API_HOST', '0.0.0.0')
 app.url_map.strict_slashes = False
 CORS(app, resources={'/*': {'origins': app_host}})
 
+
 @app.teardown_appcontext
 def teardown(exception):
     """ Close storage """
