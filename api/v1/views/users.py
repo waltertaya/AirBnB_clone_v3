@@ -1,5 +1,7 @@
 #!/usr/bin/python3
-'''Contains the users view for the API.'''
+"""
+Create a Flask app that serves the content of the AirBnB clone v3 RESTful API.
+"""
 from flask import abort, jsonify, make_response, request
 from api.v1.views import app_views
 from models import storage
@@ -8,14 +10,18 @@ from models.user import User
 
 @app_views.route('/users', methods=['GET'], strict_slashes=False)
 def users():
-    """Retrieves the list of all User objects"""
+    """
+    Retrieves the list of all User objects
+    """
     objs = storage.all(User)
     return jsonify([obj.to_dict() for obj in objs.values()])
 
 
 @app_views.route('/users/<user_id>', methods=['GET'], strict_slashes=False)
 def single_user(user_id):
-    """Retrieves a User object"""
+    """
+    Retrieves a User object
+    """
     obj = storage.get(User, user_id)
     if not obj:
         abort(404)
@@ -24,7 +30,9 @@ def single_user(user_id):
 
 @app_views.route('/users/<user_id>', methods=['DELETE'], strict_slashes=False)
 def del_user(user_id):
-    """Returns an empty dictionary with the status code 200"""
+    """
+    Deletes a User object
+    """
     obj = storage.get(User, user_id)
     if not obj:
         abort(404)
@@ -35,7 +43,9 @@ def del_user(user_id):
 
 @app_views.route('/users', methods=['POST'], strict_slashes=False)
 def post_user():
-    """Returns the new User with the status code 201"""
+    """
+    Creates a User object
+    """
     new_user = request.get_json()
     if not new_user:
         abort(400, "Not a JSON")
@@ -52,9 +62,12 @@ def post_user():
 
 @app_views.route('/users/<user_id>', methods=['PUT'], strict_slashes=False)
 def put_user(user_id):
-    """Returns the User object with the status code 200"""
+    """
+    Updates a User object
+    """
     obj = storage.get(User, user_id)
     if not obj:
+        """abort with 404 status code if obj is None"""
         abort(404)
 
     req = request.get_json()

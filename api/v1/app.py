@@ -1,16 +1,19 @@
 #!/usr/bin/python3
-'''Contains a Flask web application API.
 '''
-import os
+Create a Flask app that serves the content of the AirBnB clone v3 RESTful API.
+'''
 from flask import Flask, jsonify
 from flask_cors import CORS
+import os
 
 from models import storage
 from api.v1.views import app_views
 
 
 app = Flask(__name__)
-'''The Flask web application instance.'''
+"""
+create a blueprint object that handles all views for the application
+"""
 app_host = os.getenv('HBNB_API_HOST', '0.0.0.0')
 app_port = int(os.getenv('HBNB_API_PORT', '5000'))
 app.url_map.strict_slashes = False
@@ -20,8 +23,9 @@ CORS(app, resources={'/*': {'origins': app_host}})
 
 @app.teardown_appcontext
 def teardown_flask(exception):
-    '''The Flask app/request context end event listener.'''
-    # print(exception)
+    """
+    remove the current SQLAlchemy Session after each request
+    """
     storage.close()
 
 
@@ -41,10 +45,8 @@ def error_400(error):
 
 
 if __name__ == '__main__':
-    app_host = os.getenv('HBNB_API_HOST', '0.0.0.0')
-    app_port = int(os.getenv('HBNB_API_PORT', '5000'))
     app.run(
-        host=app_host,
-        port=app_port,
+        host=os.getenv('HBNB_API_HOST', '0.0.0.0'),
+        port=int(os.getenv('HBNB_API_PORT', '5000')),
         threaded=True
     )

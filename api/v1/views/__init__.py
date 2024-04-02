@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-Contains the blueprint for the API
+create a blueprint object that handles all views for the application
 """
 from flask import Blueprint
 
