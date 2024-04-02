@@ -1,83 +1,86 @@
 #!/usr/bin/python3
-""" View for Review objects that handles default API actions """
+'''Contains the places_reviews view for the API.'''
+from flask import abort, jsonify, make_response, request
 from api.v1.views import app_views
-from flask import jsonify, abort, make_response, request
 from models import storage
 from models.place import Place
 from models.review import Review
+from models.user import User
 
 
-@app_views.route('/places/<place_id>/reviews', methods=['GET'],
-                 strict_slashes=False)
-def reviews(place_id):
-    """ Retrieves the list of all Review objects """
-    place = storage.get("Place", place_id)
-    if not place:
+@app_views.route('/places/<place_id>/reviews',
+                 methods=['GET'], strict_slashes=False)
+def review(place_id):
+    """Retrieves the list of all Review objects of a Place"""
+    obj_place = storage.get(Place, place_id)
+    if not obj_place:
         abort(404)
-    return jsonify([review.to_dict() for review in place.reviews])
+    return jsonify([obj.to_dict() for obj in obj_place.reviews])
 
 
 @app_views.route('/reviews/<review_id>', methods=['GET'], strict_slashes=False)
-def r_review_id(review_id):
-    """ Retrieves a Review object """
-    review = storage.get("Review", review_id)
-    if not review:
+def single_review(review_id):
+    """Retrieves a Review object"""
+    obj = storage.get(Review, review_id)
+    if not obj:
         abort(404)
-    return jsonify(review.to_dict())
+    return jsonify(obj.to_dict())
 
 
-@app_views.route('/reviews/<review_id>', methods=['DELETE'],
-                 strict_slashes=False)
+@app_views.route('/reviews/<review_id>',
+                 methods=['DELETE'], strict_slashes=False)
 def del_review(review_id):
-    """ Deletes a Review object """
-    review = storage.get("Review", review_id)
-    if not review:
+    """Returns an empty dictionary with the status code 200"""
+    obj = storage.get(Review, review_id)
+    if not obj:
         abort(404)
-    review.delete()
+    obj.delete()
     storage.save()
     return make_response(jsonify({}), 200)
 
 
-@app_views.route('/places/<place_id>/reviews', methods=['POST'],
-                 strict_slashes=False)
-def post_review(place_id):
-    """ Creates a Review object """
-    place = storage.get("Place", place_id)
-    if not place:
+@app_views.route('/places/<place_id>/reviews',
+                 methods=['POST'], strict_slashes=False)
+def push_review(place_id):
+    """Returns the new Review with the status code 201"""
+    obj_place = storage.get(Place, place_id)
+    if not obj_place:
         abort(404)
+
     new_review = request.get_json()
     if not new_review:
         abort(400, "Not a JSON")
-    if "user_id" not in new_review:
+    if 'user_id' not in new_review:
         abort(400, "Missing user_id")
     user_id = new_review['user_id']
-    if not storage.get("User", user_id):
+    obj_user = storage.get(User, user_id)
+    if not obj_user:
         abort(404)
-    if "text" not in new_review:
+    if 'text' not in new_review:
         abort(400, "Missing text")
-    review = Review(**new_review)
-    setattr(review, 'place_id', place_id)
-    storage.new(review)
+
+    obj = Review(**new_review)
+    setattr(obj, 'place_id', place_id)
+    storage.new(obj)
     storage.save()
-    return make_response(jsonify(review.to_dict()), 201)
+    return make_response(jsonify(obj.to_dict()), 201)
 
 
-@app_views.route('/reviews/<review_id>', methods=['PUT'],
-                 strict_slashes=False)
+@app_views.route('/reviews/<review_id>',
+                 methods=['PUT'], strict_slashes=False)
 def put_review(review_id):
-    """ Updates a Review object """
-    review = storage.get("Review", review_id)
-    if not review:
+    """Returns the Review object with the status code 200"""
+    obj = storage.get(Review, review_id)
+    if not obj:
         abort(404)
 
-    body_request = request.get_json()
-    if not body_request:
+    req = request.get_json()
+    if not req:
         abort(400, "Not a JSON")
 
-    for k, v in body_request.items():
-        if k not in ['id', 'user_id', 'place_id',
-                     'created_at', 'updated_at']:
-            setattr(review, k, v)
+    for k, v in req.items():
+        if k not in ['id', 'user_id', 'place_id', 'created_at', 'updated_at']:
+            setattr(obj, k, v)
 
     storage.save()
-    return make_response(jsonify(review.to_dict()), 200)
+    return make_response(jsonify(obj.to_dict()), 200)
